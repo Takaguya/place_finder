@@ -1,0 +1,30 @@
+name: place_finder
+description: Find good places close to you. Built with Flutter, BLoC, Clean Architecture and Atomic Design.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Business logic and UI separation.
+  flutter_bloc: ^9.1.1
+  # Value equality for entities, events and states.
+  equatable: ^3.0.0
+  # The device position, used to work out how close each place is.
+  geolocator: ^14.1.2
+  # Manrope and Space Grotesk, the same fonts as the D2D prototype.
+  google_fonts: ^9.0.0
+  # Opens directions in the device's maps app.
+  url_launcher: ^6.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  bloc_test: ^10.0.0
+
+flutter:
+  uses-material-design: true
