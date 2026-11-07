@@ -9,7 +9,6 @@ import 'package:place_finder/features/places/domain/repositories/place_repositor
 import 'package:place_finder/features/places/domain/usecases/get_user_position.dart';
 import 'package:place_finder/features/places/domain/usecases/search_places.dart';
 import 'package:place_finder/features/places/presentation/bloc/place_search_bloc.dart';
-import 'package:place_finder/features/places/presentation/pages/search_page.dart';
 
 import '../../../helpers/fakes.dart';
 
@@ -41,6 +40,8 @@ void main() {
     tester.view.physicalSize = const Size(412, 892);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    final router = createAppRouter();
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       BlocProvider(
@@ -55,10 +56,7 @@ void main() {
             clock: () => testNoon,
           ),
         )..add(const PlaceSearchStarted()),
-        child: const MaterialApp(
-          home: SearchPage(),
-          onGenerateRoute: AppRouter.onGenerateRoute,
-        ),
+        child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pump();

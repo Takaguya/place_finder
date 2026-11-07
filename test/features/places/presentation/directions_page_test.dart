@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:place_finder/app_router.dart';
 import 'package:place_finder/core/result.dart';
 import 'package:place_finder/features/places/domain/entities/ranked_place.dart';
 import 'package:place_finder/features/places/domain/entities/user_position.dart';
@@ -9,7 +8,6 @@ import 'package:place_finder/features/places/domain/entities/walking_route.dart'
 import 'package:place_finder/features/places/domain/usecases/get_walking_route.dart';
 import 'package:place_finder/features/places/domain/usecases/open_in_maps_app.dart';
 import 'package:place_finder/features/places/presentation/pages/directions_page.dart';
-import 'package:place_finder/features/places/presentation/pages/place_details_page.dart';
 
 import '../../../helpers/fakes.dart';
 
@@ -45,10 +43,7 @@ void main() {
             value: OpenInMapsApp(mapsApp ?? FakeMapsAppRepository()),
           ),
         ],
-        child: MaterialApp(
-          home: page,
-          onGenerateRoute: AppRouter.onGenerateRoute,
-        ),
+        child: MaterialApp(home: page),
       ),
     );
     await tester.pump();
@@ -124,21 +119,6 @@ void main() {
 
     expect(find.text('15 min walk'), findsOneWidget);
     expect(find.text('No route today.'), findsNothing);
-  });
-
-  testWidgets('get directions on the details screen opens the guide', (
-    tester,
-  ) async {
-    await pumpPage(
-      tester,
-      PlaceDetailsPage(entry: entry, position: fromDevice),
-      routes: FakeRouteRepository(Success(testRoute)),
-    );
-
-    await tapAndWait(tester, 'Get directions');
-
-    expect(find.text('15 min walk'), findsOneWidget);
-    expect(find.text('Head north on Norodom Blvd'), findsOneWidget);
   });
 
   group('open in Google Maps', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:place_finder/app_router.dart';
 import 'package:place_finder/core/result.dart';
 import 'package:place_finder/features/places/domain/entities/ranked_place.dart';
@@ -37,10 +38,12 @@ void main() {
   }
 
   /// Starts on the first route at a phone's size, using fake repositories.
-  Future<void> pumpApp(WidgetTester tester) async {
+  Future<GoRouter> pumpApp(WidgetTester tester) async {
     tester.view.physicalSize = const Size(412, 892);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    final router = createAppRouter();
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       MultiRepositoryProvider(
@@ -63,14 +66,16 @@ void main() {
               clock: () => testNoon,
             ),
           )..add(const PlaceSearchStarted()),
-          child: const MaterialApp(
-            initialRoute: PlaceRoutes.search,
-            onGenerateRoute: AppRouter.onGenerateRoute,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       ),
     );
     await settle(tester);
+    return router;
+  }
+
+  String locationOf(GoRouter router) {
+    return router.routerDelegate.currentConfiguration.uri.path;
   }
 
   BuildContext searchContext(WidgetTester tester) {
@@ -83,13 +88,14 @@ void main() {
   }
 
   testWidgets('the first route is the search screen', (tester) async {
-    await pumpApp(tester);
+    final router = await pumpApp(tester);
 
     expect(find.byType(SearchPage), findsOneWidget);
+    expect(locationOf(router), PlaceRoutes.search);
   });
 
   testWidgets('openDetails opens the place it was given', (tester) async {
-    await pumpApp(tester);
+    final router = await pumpApp(tester);
 
     PlaceRoutes.openDetails(searchContext(tester), args);
     await settle(tester);
@@ -97,12 +103,11 @@ void main() {
     final page = tester.widget<PlaceDetailsPage>(find.byType(PlaceDetailsPage));
     expect(page.entry, args.entry);
     expect(page.position, args.position);
-    final route = ModalRoute.of(tester.element(find.byType(PlaceDetailsPage)));
-    expect(route?.settings.name, PlaceRoutes.details);
+    expect(locationOf(router), PlaceRoutes.details);
   });
 
   testWidgets('openDirections opens the place it was given', (tester) async {
-    await pumpApp(tester);
+    final router = await pumpApp(tester);
 
     PlaceRoutes.openDirections(searchContext(tester), args);
     await settle(tester);
@@ -110,45 +115,51 @@ void main() {
     final page = tester.widget<DirectionsPage>(find.byType(DirectionsPage));
     expect(page.entry, args.entry);
     expect(page.position, args.position);
-    final route = ModalRoute.of(tester.element(find.byType(DirectionsPage)));
-    expect(route?.settings.name, PlaceRoutes.directions);
+    expect(locationOf(router), PlaceRoutes.directions);
   });
 
-  group('a route that cannot open goes to the search screen', () {
-    Future<void> pushAndExpectSearch(
+  group('an address that cannot open goes to the search screen', () {
+    Future<void> goAndExpectSearch(
       WidgetTester tester,
-      String name,
-      Object? arguments,
-    ) async {
-      await pumpApp(tester);
+      String location, {
+      Object? extra,
+    }) async {
+      final router = await pumpApp(tester);
 
-      Navigator.of(
-        searchContext(tester),
-      ).pushNamed(name, arguments: arguments);
+      router.go(location, extra: extra);
       await settle(tester);
 
-      expect(find.byType(SearchPage, skipOffstage: false), findsNWidgets(2));
+      expect(find.byType(SearchPage), findsOneWidget);
       expect(find.byType(PlaceDetailsPage), findsNothing);
       expect(find.byType(DirectionsPage), findsNothing);
+      expect(locationOf(router), PlaceRoutes.search);
     }
 
-    testWidgets('when the name is unknown', (tester) async {
-      await pushAndExpectSearch(tester, '/nowhere', null);
+    testWidgets('when it matches no route', (tester) async {
+      await goAndExpectSearch(tester, '/nowhere');
     });
 
     testWidgets('when details has no place', (tester) async {
-      await pushAndExpectSearch(tester, PlaceRoutes.details, null);
+      await goAndExpectSearch(tester, PlaceRoutes.details);
+    });
+
+    testWidgets('when directions has no place', (tester) async {
+      await goAndExpectSearch(tester, PlaceRoutes.directions);
     });
 
     testWidgets('when directions has the wrong kind of data', (tester) async {
-      await pushAndExpectSearch(tester, PlaceRoutes.directions, 'Corner Cafe');
+      await goAndExpectSearch(
+        tester,
+        PlaceRoutes.directions,
+        extra: 'Corner Cafe',
+      );
     });
   });
 
-  testWidgets('a visit goes forward through the screens and back again', (
+  testWidgets('the on-screen button goes back through the screens', (
     tester,
   ) async {
-    await pumpApp(tester);
+    final router = await pumpApp(tester);
 
     await tapAndWait(tester, find.text('Corner Cafe'));
     expect(find.byType(PlaceDetailsPage), findsOneWidget);
@@ -156,13 +167,34 @@ void main() {
     await tapAndWait(tester, find.text('Get directions'));
     expect(find.byType(DirectionsPage), findsOneWidget);
     expect(find.text('15 min walk'), findsOneWidget);
+    expect(find.text('Head north on Norodom Blvd'), findsOneWidget);
 
     await tapAndWait(tester, find.byType(MapBackButton));
     expect(find.byType(DirectionsPage), findsNothing);
     expect(find.byType(PlaceDetailsPage), findsOneWidget);
+    expect(locationOf(router), PlaceRoutes.details);
 
     await tapAndWait(tester, find.byType(MapBackButton));
     expect(find.byType(PlaceDetailsPage), findsNothing);
     expect(find.byType(SearchPage), findsOneWidget);
+    expect(locationOf(router), PlaceRoutes.search);
+  });
+
+  testWidgets('the Android Back key goes back through the screens', (
+    tester,
+  ) async {
+    final router = await pumpApp(tester);
+    PlaceRoutes.openDirections(searchContext(tester), args);
+    await settle(tester);
+
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    expect(find.byType(PlaceDetailsPage), findsOneWidget);
+    expect(locationOf(router), PlaceRoutes.details);
+
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    expect(find.byType(SearchPage), findsOneWidget);
+    expect(locationOf(router), PlaceRoutes.search);
   });
 }

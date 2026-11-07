@@ -29,6 +29,22 @@ android {
         versionName = flutter.versionName
     }
 
+    // Each flavor installs as its own app, so both can sit on one phone. Pick one
+    // with `flutter run --flavor dev` or `--flavor prod`. The Dart side of each
+    // flavor is in lib/core/config/app_flavor.dart.
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            manifestPlaceholders["appLabel"] = "Place Finder Dev"
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appLabel"] = "Place Finder"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

@@ -97,6 +97,14 @@ void main() {
     test('the feature never imports the router that sits above it', () {
       expect(violations(places, ['app_router.dart']), isEmpty);
     });
+
+    test('only the routes file in the feature knows about go_router', () {
+      final users = violations(places, ['package:go_router']).where(
+        (line) => !line.contains('place_routes.dart:'),
+      );
+
+      expect(users, isEmpty);
+    });
   });
 
   group('Atomic Design', () {

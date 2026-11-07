@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 
 import '../domain/entities/ranked_place.dart';
 import '../domain/entities/user_position.dart';
@@ -19,10 +20,10 @@ abstract final class PlaceRoutes {
   static const String directions = '/place/directions';
 
   static void openDetails(BuildContext context, PlaceRouteArgs args) {
-    Navigator.of(context).pushNamed(details, arguments: args);
+    context.go(details, extra: args);
   }
 
   static void openDirections(BuildContext context, PlaceRouteArgs args) {
-    Navigator.of(context).pushNamed(directions, arguments: args);
+    context.go(directions, extra: args);
   }
 }

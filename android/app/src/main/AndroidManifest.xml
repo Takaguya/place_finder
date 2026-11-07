@@ -6,7 +6,7 @@
     <!-- Downloads the app's fonts. Release builds don't include this by default. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Place Finder"
+        android:label="${appLabel}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

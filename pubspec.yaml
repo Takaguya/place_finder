@@ -19,6 +19,8 @@ dependencies:
   google_fonts: ^9.0.0
   # Opens directions in the device's maps app.
   url_launcher: ^6.3.3
+  # The routes between screens.
+  go_router: ^18.1.3
 
 dev_dependencies:
   flutter_test:
@@ -28,3 +30,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Used when no --flavor is given. Without it, a plain Android build can report
+  # success while pointing at an old APK left in build/. iOS can't build with
+  # this until its Xcode project has matching dev and prod schemes.
+  default-flavor: dev
