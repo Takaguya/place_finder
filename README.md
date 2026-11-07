@@ -13,6 +13,20 @@ This is a Demo for Application for finding malls, restaurants, cafes and markets
 - Show routes
 - Show time travel by walking
 
+## Tech Stack
+
+| Area | Library |
+|---|---|
+| Framework | Flutter (Dart) |
+| State management | flutter_bloc |
+| Routing | go_router |
+| Value equality | equatable |
+| Location | geolocator |
+| Opening Google Maps | url_launcher |
+| Fonts | google_fonts |
+| Testing | flutter_test + bloc_test |
+| Linting | flutter_lints |
+
 ## Project Structure
 
 ```
@@ -20,7 +34,7 @@ lib/
   main.dart, app.dart
   app_router.dart           Matches each route name to its screen
   injection.dart            Connects the layers. The only file that picks a data source.
-  core/                     Result type and theme
+  core/                     Result type, theme and flavor settings
   features/places/
     sketch_map.dart         The test map's streets and artwork, used only by the map and the route finder
     domain/                 Business rules in plain Dart, with no Flutter
@@ -60,7 +74,26 @@ lib/
 | `/place` | `PlaceDetailsPage` | `PlaceRouteArgs` |
 | `/place/directions` | `DirectionsPage` | `PlaceRouteArgs` |
 
+## Flavors
 
+The app comes in two versions that install separately, so both can sit on one phone.
 
+| Flavor | What it's for | App name | Banner |
+|---|---|---|---|
+| `dev` | Development and testing | Place Finder Dev | Red DEV ribbon |
+| `prod` | The production app | Place Finder | None |
 
+Both flavors use the same test data for now.
+
+## Screenshot
+
+<p align="center">
+  <img src="mobile-screenshot/screenshot1.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot2.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot3.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot4.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot5.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot6.jpg" width="30%">
+  <img src="mobile-screenshot/screenshot7.jpg" width="30%">
+</p>
 
